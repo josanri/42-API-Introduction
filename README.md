@@ -11,3 +11,5 @@ Desde la siguiente URL tenemos acceso al menú para el registro de una aplicaci�
 Es un código que empieza con u-xxx... que se puede compartir.
 ## Secret
 Es un código que empieza con s-xxx... que no se debe compartir y solo hará uso de él el servidor.
+# Uso de la aplicación
+Es necesario especificar en un fichero **.env** la ```API_UID``` y ```API_SECRET```
