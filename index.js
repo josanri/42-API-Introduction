@@ -30,17 +30,47 @@ function getOptionsToken(access_token) {
     };
 }
 
-function getURLForUser(user)
+
+function getDataFromUser(user, token)
 {
-    return `https://api.intra.42.fr/v2/users/${user}`
+    fetch(`https://api.intra.42.fr/v2/users/${user}`, getOptionsToken(token))
+    .then(response => {
+        response.json()
+        .then(me => {
+            console.log(me.id + " " + me.email + " " + me.login);
+            return me;
+        })
+    });
+}
+
+async function getUsersFromCampus(campus_id, token) {
+    let url = `https://api.intra.42.fr/v2/campus/${campus_id}/users`;
+    const students = []
+    try {
+        while (url !== null) {
+            const response = await fetch(url, getOptionsToken(token));
+            const link = response.headers.get('link');
+            const users = await response.json();
+            users.forEach(user => {
+                students.push(user.login);
+            });
+            const nextLink = link.split(", ").filter(x => x.includes("next"));
+            if (nextLink.length > 0) {
+                url = nextLink[0].substring(1, nextLink[0].indexOf('>'));
+            } else {
+                url = null;
+            }
+        }
+    } catch (err) {
+        console.log(err);
+    }
+    console.log(students);
 }
 
 fetch('https://api.intra.42.fr/oauth/token', postOptions)
 .then((res) => res.json().then((jsonData) => {
     console.log(jsonData);
-    fetch(getURLForUser("josesanc"), getOptionsToken(jsonData.access_token))
-    .then(response => {
-        response.json().then(me => console.log(me.id + " " + me.email + " " + me.login))
-    }); 
+    getDataFromUser('josesanc', jsonData.access_token)
+    getUsersFromCampus(37, jsonData.access_token)
 }))
-.catch((e) => console.log("Error: " +  e));
+.catch((e) => console.log("Error: " +  e))
